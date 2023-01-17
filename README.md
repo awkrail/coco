@@ -1,2 +1,2 @@
 # awkrailos.c
-My experimental OS written in C
+This is an re-implmentation of mikanOS fully written in C.
