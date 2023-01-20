@@ -1,5 +1,5 @@
 TARGET = kernel.elf
-OBJS = main.o graphics.o font.o hankaku.o newlib_support.o
+OBJS = main.o graphics.o font.o hankaku.o console.o newlib_support.o
 
 CFLAGS += -I$(HOME)/awkrailos.c/x86_64-elf/include \
 					-I$(HOME)/awkrailos.c/x86_64-elf/freetype2 \

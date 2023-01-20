@@ -5,11 +5,27 @@
 #include "frame_buffer_config.h"
 #include "graphics.h"
 #include "font.h"
+#include "console.h"
+
+struct Console console;
+
+int printk(const char *format, ...)
+{
+  va_list ap;
+  int result;
+  char s[1024];
+
+  va_start(ap, format);
+  result = vsprintf(s, format, ap);
+  va_end(ap);
+
+  PutString(&console, s);
+  return result;
+}
 
 void KernelMain(const struct FrameBufferConfig *frame_buffer_config) 
 {
   const struct PixelColor white = {255, 255, 255};
-  const struct PixelColor green = {0, 255, 0};
   const struct PixelColor black = {0, 0, 0};
 
   for(int x=0; x < frame_buffer_config->horizontal_resolution; ++x){
@@ -17,21 +33,11 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
       WritePixel(frame_buffer_config, x, y, &white);
     }
   }
+  
+  InitConsole(&console, frame_buffer_config, &black, &white);
 
-  for(int x=0; x < 200; ++x) {
-    for(int y=0; y<100; ++y) {
-      WritePixel(frame_buffer_config, 100+x, 100+y, &green);
-    }
+  for(int i=0; i<27; ++i) {
+    printk("printk: %d\n", i);
   }
-
-  int i = 0;
-  for(char c = '!'; c <= '~'; ++c, ++i) {
-    WriteAscii(frame_buffer_config, 8 * i, 50, c, &black);
-  }
-  WriteString(frame_buffer_config, 0, 66, "Hello, world!", &black);
-
-  char buf[128];
-  sprintf(buf, "1 + 2 = %d", 1 + 2);
-  WriteString(frame_buffer_config, 0, 82, buf, &black);
   while (1) __asm__("hlt");
 }
