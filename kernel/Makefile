@@ -1,9 +1,15 @@
 TARGET = kernel.elf
-OBJS = main.o graphics.o font.o hankaku.o
+OBJS = main.o graphics.o font.o hankaku.o newlib_support.o
 
+CFLAGS += -I$(HOME)/awkrailos.c/x86_64-elf/include \
+					-I$(HOME)/awkrailos.c/x86_64-elf/freetype2 \
+					-I$(HOME)/edk2/MdePkg/Include -I/$HOME/edk2/Include/X64
 CFLAGS += -Og -Wall -g --target=x86_64-elf -ffreestanding -mno-red-zone \
 					-std=c11
+LDFLAGS += -L$(HOME)/awkrailos.c/x86_64-elf/lib
 LDFLAGS += --entry KernelMain -z norelro --image-base 0x100000 --static
+
+$(warning LDFLAGS = $(LDFLAGS))
 
 .PHONY: all
 all: $(TARGET)
@@ -13,7 +19,7 @@ clean:
 	rm -rf *.o
 
 kernel.elf: $(OBJS) Makefile
-	ld.lld $(LDFLAGS) -o kernel.elf $(OBJS)
+	ld.lld $(LDFLAGS) -o kernel.elf $(OBJS) -lc
 
 %.o: %.c Makefile
 	clang $(CPPFLAGS) $(CFLAGS) -c $<

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "frame_buffer_config.h"
 #include "graphics.h"
@@ -27,5 +28,10 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
   for(char c = '!'; c <= '~'; ++c, ++i) {
     WriteAscii(frame_buffer_config, 8 * i, 50, c, &black);
   }
+  WriteString(frame_buffer_config, 0, 66, "Hello, world!", &black);
+
+  char buf[128];
+  sprintf(buf, "1 + 2 = %d", 1 + 2);
+  WriteString(frame_buffer_config, 0, 82, buf, &black);
   while (1) __asm__("hlt");
 }

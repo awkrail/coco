@@ -30,3 +30,12 @@ void WriteAscii(const struct FrameBufferConfig *config,
     }
   }
 }
+
+void WriteString(const struct FrameBufferConfig *config,
+                 int x, int y, const char *s,
+                 const struct PixelColor *color)
+{
+  for(int i=0; s[i] != '\0'; ++i) {
+    WriteAscii(config, x + 8 * i, y, s[i], color);
+  }
+}
