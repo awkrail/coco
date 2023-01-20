@@ -11,7 +11,7 @@ const uint8_t *GetFont(char c)
   if(index >= hankaku_size)
     return NULL;
 
-  return (const uint8_t*)(&_binary_hankaku_bin_start + index);
+  return &_binary_hankaku_bin_start + index;
 }
 
 void WriteAscii(const struct FrameBufferConfig *config,
