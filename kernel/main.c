@@ -23,7 +23,9 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
     }
   }
 
-  WriteAscii(frame_buffer_config, 50, 50, 'A', &black);
-  WriteAscii(frame_buffer_config, 58, 50, 'A', &black);
+  int i = 0;
+  for(char c = '!'; c <= '~'; ++c, ++i) {
+    WriteAscii(frame_buffer_config, 8 * i, 50, c, &black);
+  }
   while (1) __asm__("hlt");
 }

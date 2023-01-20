@@ -1,7 +1,7 @@
 TARGET = kernel.elf
-OBJS = main.o graphics.o font.o
+OBJS = main.o graphics.o font.o hankaku.o
 
-CFLAGS += -O2 -Wall -g --target=x86_64-elf -ffreestanding -mno-red-zone \
+CFLAGS += -Og -Wall -g --target=x86_64-elf -ffreestanding -mno-red-zone \
 					-std=c11
 LDFLAGS += --entry KernelMain -z norelro --image-base 0x100000 --static
 
@@ -17,3 +17,6 @@ kernel.elf: $(OBJS) Makefile
 
 %.o: %.c Makefile
 	clang $(CPPFLAGS) $(CFLAGS) -c $<
+
+hankaku.o: hankaku.bin
+	objcopy -I binary -O elf64-x86-64 -B i386:x86-64 $< $@
