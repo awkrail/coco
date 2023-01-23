@@ -5,6 +5,15 @@
 
 #include "error.h"
 
+struct ClassCode {
+  uint8_t base, sub, interface;
+};
+
+struct Device {
+  uint8_t bus, device, function, header_type;
+  struct ClassCode class_code;
+};
+
 uint32_t shl32(uint32_t x, unsigned int bits);
 
 // get/set registers
@@ -16,22 +25,25 @@ uint32_t ReadData();
 uint16_t ReadVendorId(uint8_t bus, uint8_t device, uint8_t function);
 uint16_t ReadDeviceId(uint8_t bus, uint8_t device, uint8_t function);
 uint8_t ReadHeaderType(uint8_t bus, uint8_t device, uint8_t function);
-uint32_t ReadClassCode(uint8_t bus, uint8_t device, uint8_t function);
+struct ClassCode ReadClassCode(uint8_t bus, uint8_t device, uint8_t function);
 uint32_t ReadBusNumbers(uint8_t bus, uint8_t device, uint8_t function);
 
+// scan all devices
 bool IsSingleFunctionDevice(uint8_t header_type);
-
 enum Error ScanDevice(uint8_t bus, uint8_t device);
-enum Error ScanFunction(uint8_t bus, uint8_t device, 
-                          uint8_t function);
-enum Error AddDevice(uint8_t bus, uint8_t device,
-                       uint8_t function, uint8_t header_type);
+enum Error ScanFunction(uint8_t bus, uint8_t device, uint8_t function);
+enum Error AddDevice(const struct Device dev);
 enum Error ScanBus(uint8_t bus);
 enum Error ScanAllBus();
 
-struct Device {
-  uint8_t bus, device, function, header_type;
-};
+// check if class code matches to all / base and sub / base
+bool MatchAllClassCode(struct ClassCode class_code, 
+                       uint8_t base, uint8_t sub,
+                       uint8_t interface);
+bool MatchBaseAndSubClassCode(struct ClassCode class_code, 
+                              uint8_t base, uint8_t sub);
+bool MatchBaseClassCode(struct ClassCode class_code,
+                        uint8_t base);
 
 struct Device devices[32];
 int num_device;

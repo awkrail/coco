@@ -53,10 +53,15 @@ uint8_t ReadHeaderType(uint8_t bus, uint8_t device, uint8_t function)
   return (ReadData() >> 16) & 0xffu;
 }
 
-uint32_t ReadClassCode(uint8_t bus, uint8_t device, uint8_t function)
+struct ClassCode ReadClassCode(uint8_t bus, uint8_t device, uint8_t function)
 {
   WriteAddress(MakeAddress(bus, device, function, 0x08));
-  return ReadData();
+  uint32_t reg = ReadData();
+  struct ClassCode cc;
+  cc.base = (reg >> 24) & 0xffu;
+  cc.sub = (reg >> 16) & 0xffu;
+  cc.interface = (reg >> 8) & 0xffu;
+  return cc;
 }
 
 uint32_t ReadBusNumbers(uint8_t bus, uint8_t device, uint8_t function)
@@ -92,18 +97,18 @@ enum Error ScanDevice(uint8_t bus, uint8_t device)
 }
 
 enum Error ScanFunction(uint8_t bus, uint8_t device, 
-                          uint8_t function)
+                        uint8_t function)
 {
+  struct ClassCode class_code = ReadClassCode(bus, device, function);
   uint8_t header_type = ReadHeaderType(bus, device, function);
-  enum Error err = AddDevice(bus, device, function, header_type);
+  const struct Device dev = {bus, device, function, 
+                             header_type, class_code};
+
+  enum Error err = AddDevice(dev);
   if(err)
     return err;
 
-  uint32_t class_code = ReadClassCode(bus, device, function);
-  uint8_t base = (class_code >> 24) & 0xffu;
-  uint8_t sub = (class_code >> 16) & 0xffu;
-
-  if(base == 0x06u && sub == 0x04u) {
+  if(MatchBaseAndSubClassCode(class_code, 0x06u, 0x04u)) {
     uint32_t bus_numbers = ReadBusNumbers(bus, device, function);
     uint8_t secondary_bus = (bus_numbers >> 8) & 0xffu;
     return ScanBus(secondary_bus);
@@ -112,14 +117,12 @@ enum Error ScanFunction(uint8_t bus, uint8_t device,
   return kSuccess;
 }
 
-enum Error AddDevice(uint8_t bus, uint8_t device, 
-                       uint8_t function, uint8_t header_type)
+enum Error AddDevice(const struct Device dev)
 {
   int max_device_size = 32; // max device size
   if(num_device == max_device_size)
     return kFull;
 
-  struct Device dev = {bus, device, function, header_type};
   devices[num_device] = dev;
   ++num_device;
 
@@ -156,4 +159,24 @@ enum Error ScanAllBus()
       return err;
   }
   return kSuccess;
+}
+
+bool MatchAllClassCode(struct ClassCode class_code, 
+                       uint8_t base, uint8_t sub,
+                       uint8_t interface)
+{
+  return MatchBaseAndSubClassCode(class_code, base, sub) 
+    && class_code.interface == interface;
+}
+
+bool MatchBaseAndSubClassCode(struct ClassCode class_code, 
+                       uint8_t base, uint8_t sub)
+{
+  return MatchBaseClassCode(class_code, base) && class_code.sub == sub;
+}
+
+bool MatchBaseClassCode(struct ClassCode class_code,
+                        uint8_t base)
+{
+  return class_code.base == base;
 }
