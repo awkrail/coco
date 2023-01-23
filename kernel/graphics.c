@@ -34,3 +34,30 @@ void WritePixel(const struct FrameBufferConfig *config,
       break;
   }
 }
+
+void DrawRectangle(const struct FrameBufferConfig *config,
+                   const struct IntVector2D *pos,
+                   const struct IntVector2D *size,
+                   const struct PixelColor *color)
+{
+  for(int dx=0; dx<size->x; ++dx) {
+    WritePixel(config, pos->x + dx, pos->y, color);
+    WritePixel(config, pos->x + dx, pos->y + size->y - 1, color);
+  }
+  for(int dy=1; dy<size->y; ++dy) {
+    WritePixel(config, pos->x, pos->y + dy, color);
+    WritePixel(config, pos->x + size->x - 1, pos->y + dy, color);
+  }
+}
+
+void FillRectangle(const struct FrameBufferConfig *config,
+                   const struct IntVector2D *pos,
+                   const struct IntVector2D *size,
+                   const struct PixelColor *color)
+{
+  for(int dy=0; dy<size->y; ++dy) {
+    for(int dx=0; dx<size->x; ++dx) {
+      WritePixel(config, pos->x + dx, pos->y + dy, color);
+    }
+  }
+}
