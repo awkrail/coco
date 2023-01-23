@@ -6,6 +6,8 @@
 #include "graphics.h"
 #include "font.h"
 #include "console.h"
+#include "pci.h"
+#include "error.h"
 
 struct Console console;
 
@@ -84,6 +86,19 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
         WritePixel(frame_buffer_config, 200+dx, 100+dy, &white);
       }
     }
+  }
+
+  printk("Running ScanAllBus...\n");
+  enum Error err = ScanAllBus();
+  printk("ScanAllBus: %s\n", GetErrName(err));
+
+  for(int i=0; i<num_device; ++i) {
+    const struct Device dev = devices[i];
+    const uint16_t vendor_id = ReadVendorId(dev.bus, dev.device, dev.function);
+    const uint32_t class_code = ReadClassCode(dev.bus, dev.device, dev.function);
+    printk("%d.%d.%d: vend %04x, class %08x, head %02x\n",
+        dev.bus, dev.device, dev.function, 
+        vendor_id, class_code, dev.header_type);
   }
 
   while (1) __asm__("hlt");

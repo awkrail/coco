@@ -1,5 +1,6 @@
 TARGET = kernel.elf
-OBJS = main.o graphics.o font.o hankaku.o console.o newlib_support.o
+OBJS = main.o graphics.o font.o hankaku.o console.o newlib_support.o \
+			 pci.o error.o asmfunc.o
 
 CFLAGS += -I$(HOME)/awkrailos.c/x86_64-elf/include \
 					-I$(HOME)/awkrailos.c/x86_64-elf/freetype2 \
@@ -23,6 +24,9 @@ kernel.elf: $(OBJS) Makefile
 
 %.o: %.c Makefile
 	clang $(CPPFLAGS) $(CFLAGS) -c $<
+
+%.o: %.asm Makefile
+	nasm -f elf64 -o $@ $<
 
 hankaku.o: hankaku.bin
 	objcopy -I binary -O elf64-x86-64 -B i386:x86-64 $< $@
