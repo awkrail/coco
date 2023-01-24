@@ -109,11 +109,17 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
   }
 
   if(xhc_dev) {
-    // Doesn't work properly...
-    // TODO: I will investigate it
-    Log(kInfo, "xHC has been found: %d.%d.%d\n",
+    Log(kInfo, &console, "xHC has been found: %d.%d.%d\n",
         xhc_dev->bus, xhc_dev->device, xhc_dev->function);
   }
+
+  // Load MMIO registers for xHCI device
+  uint64_t xhc_bar;
+  err = ReadBar(xhc_dev, &xhc_bar, 0);
+  Log(kDebug, &console, "ReadBar: %s\n", GetErrName(err));
+  Log(kDebug, &console, "xhc_bar: %08lx\n", xhc_bar);
+  const uint64_t xhc_mmio_base = xhc_bar & ~(uint64_t)(0xf);
+  Log(kDebug, &console, "xHC mmio_base = %08lx\n", xhc_mmio_base);
 
   for(int i=0; i<num_device; ++i) {
     const struct Device dev = devices[i];

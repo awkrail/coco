@@ -1,5 +1,7 @@
 #pragma once
 
+#include "console.h"
+
 enum LogLevel {
   kError = 3,
   kWarn = 4,
@@ -8,4 +10,5 @@ enum LogLevel {
 };
 
 void SetLogLevel(enum LogLevel level);
-int Log(enum LogLevel level, const char* format, ...);
+int Log(enum LogLevel level, struct Console *console,
+        const char* format, ...);

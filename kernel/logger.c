@@ -3,17 +3,15 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include "console.h"
-
 enum LogLevel log_level = kWarn;
-extern struct Console* console;
 
 void SetLogLevel(enum LogLevel level)
 {
   log_level = level;
 }
 
-int Log(enum LogLevel level, const char* format, ...)
+int Log(enum LogLevel level, struct Console *console,
+        const char* format, ...)
 {
   if(level < log_level)
     return 0;

@@ -45,5 +45,15 @@ bool MatchBaseAndSubClassCode(struct ClassCode class_code,
 bool MatchBaseClassCode(struct ClassCode class_code,
                         uint8_t base);
 
+const uint8_t CalcBarAddress(unsigned int bar_index);
+
+uint32_t ReadConfReg(const struct Device *device, uint8_t reg_addr);
+
+void WriteConfReg(const struct Device *device, uint8_t reg_addr, 
+                  uint32_t value);
+
+enum Error ReadBar(struct Device *device, uint64_t *bar, 
+                   unsigned int bar_index);
+
 struct Device devices[32];
 int num_device;

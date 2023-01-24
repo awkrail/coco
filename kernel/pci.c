@@ -161,6 +161,52 @@ enum Error ScanAllBus()
   return kSuccess;
 }
 
+const uint8_t CalcBarAddress(unsigned int bar_index)
+{
+  return 0x10 + 4 * bar_index;
+}
+
+uint32_t ReadConfReg(const struct Device *dev, uint8_t reg_addr)
+{
+  WriteAddress(MakeAddress(dev->bus, dev->device, dev->function, reg_addr));
+  return ReadData();
+}
+
+void WriteConfReg(const struct Device *dev, uint8_t reg_addr, 
+                  uint32_t value)
+{
+  WriteAddress(MakeAddress(dev->bus, dev->device, dev->function, reg_addr));
+  WriteData(value);
+}
+
+enum Error ReadBar(struct Device *device, uint64_t *bar,
+                   unsigned int bar_index)
+{
+  if(bar_index >= 6) { 
+    *bar = 0;
+    return kIndexOutOfRange;
+  }
+
+  const uint8_t addr = CalcBarAddress(bar_index);
+  uint32_t b = ReadConfReg(device, addr);
+
+  // 32 bit address
+  if((b & 4u) == 0) {
+    *bar = (uint64_t)b;
+    return kSuccess;
+  }
+
+  // 64 bit address
+  if(bar_index >= 5) {
+    *bar = 0;
+    return kIndexOutOfRange;
+  }
+
+  const uint32_t b_upper = ReadConfReg(device, addr + 4);
+  *bar = b | (uint64_t)b_upper << 32;
+  return kSuccess;
+}
+
 bool MatchAllClassCode(struct ClassCode class_code, 
                        uint8_t base, uint8_t sub,
                        uint8_t interface)
