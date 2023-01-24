@@ -26,6 +26,35 @@ int printk(const char *format, ...)
   return result;
 }
 
+void SwitchEhci2Xhci(const struct Device *xhc_dev)
+{
+  bool intel_ehc_exist = false;
+  for(int i=0; i < num_device; ++i) {
+    uint8_t bus = devices[i].bus;
+    uint8_t device = devices[i].device;
+    uint8_t function = devices[i].function;
+    struct ClassCode class_code =devices[i].class_code;
+
+    if(MatchAllClassCode(class_code, 0x0cu, 0x03u, 0x20u)
+      && 0x8086 == ReadVendorId(bus, device, function)) {
+      intel_ehc_exist = true;
+      break;
+    }
+  }
+  
+  Log(kDebug, &console, "intel EHC exist?: %d\n", intel_ehc_exist);
+
+  if(!intel_ehc_exist)
+    return;
+
+  uint32_t superspeed_ports = ReadConfReg(xhc_dev, 0xdc);
+  WriteConfReg(xhc_dev, 0xd8, superspeed_ports);
+  uint32_t ehci2xhci_ports = ReadConfReg(xhc_dev, 0xd4);
+  WriteConfReg(xhc_dev, 0xd0, ehci2xhci_ports);
+  Log(kDebug, &console, "SwitchEhci2Xhci: SS = %02, xHCI = %02x\n",
+      superspeed_ports, ehci2xhci_ports);
+}
+
 const struct PixelColor kDesktopBGColor = {128, 128, 128};
 const struct PixelColor kDesktopFGColor = {255, 255, 255};
 
@@ -120,6 +149,12 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
   Log(kDebug, &console, "xhc_bar: %08lx\n", xhc_bar);
   const uint64_t xhc_mmio_base = xhc_bar & ~(uint64_t)(0xf);
   Log(kDebug, &console, "xHC mmio_base = %08lx\n", xhc_mmio_base);
+
+  // Initialize xHCI
+  // struct Controller xhc;
+  SwitchEhci2Xhci(xhc_dev);
+  //err = Initialize(xhc);
+  //Log(kDebug, &console, "xhc.initialize: %s\n", GetErrName(err));
 
   for(int i=0; i<num_device; ++i) {
     const struct Device dev = devices[i];
