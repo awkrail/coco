@@ -2,12 +2,12 @@ TARGET = kernel.elf
 OBJS = main.o graphics.o font.o hankaku.o console.o newlib_support.o \
 			 pci.o error.o asmfunc.o logger.o
 
-CFLAGS += -I$(HOME)/awkrailos.c/x86_64-elf/include \
-					-I$(HOME)/awkrailos.c/x86_64-elf/freetype2 \
+CFLAGS += -I$(HOME)/coco/x86_64-elf/include \
+					-I$(HOME)/coco/x86_64-elf/freetype2 \
 					-I$(HOME)/edk2/MdePkg/Include -I/$HOME/edk2/Include/X64
 CFLAGS += -Og -Wall -g --target=x86_64-elf -ffreestanding -mno-red-zone \
 					-std=c11
-LDFLAGS += -L$(HOME)/awkrailos.c/x86_64-elf/lib
+LDFLAGS += -L$(HOME)/coco/x86_64-elf/lib
 LDFLAGS += --entry KernelMain -z norelro --image-base 0x100000 --static
 
 .PHONY: all

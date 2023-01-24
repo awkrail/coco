@@ -77,7 +77,7 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
   
   InitConsole(&console, frame_buffer_config, &black, &white);
   FillRectangle(frame_buffer_config, &ul_p, &lr_p, &gray);
-  printk("Welcome to awkrailOS!\n");
+  printk("Welcome to coco OS!\n");
   SetLogLevel(kWarn);
 
   for(int dy =0; dy < kMouseCursorHeight; ++dy) {

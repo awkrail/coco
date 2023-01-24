@@ -196,7 +196,6 @@ EFI_STATUS EFIAPI UefiMain(
 {
 
   EFI_STATUS status;
-  Print(L"Hello, Awkrail OS World!\n");
   
   // load memory map
   CHAR8 memmap_buf[4096 * 4];
