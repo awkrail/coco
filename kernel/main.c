@@ -151,18 +151,31 @@ void KernelMain(const struct FrameBufferConfig *frame_buffer_config)
   Log(kDebug, &console, "xHC mmio_base = %08lx\n", xhc_mmio_base);
 
   // Initialize xHCI
-  // struct Controller xhc;
   SwitchEhci2Xhci(xhc_dev);
-  //err = Initialize(xhc);
-  //Log(kDebug, &console, "xhc.initialize: %s\n", GetErrName(err));
+  struct Controller xhc;
+  InitializeController(&xhc, xhc_mmio_base);
+  err = InitializeXhci(xhc);
+  Log(kDebug, &console, "xhc.initialize: %s\n", GetErrName(err));
+  Run(xhc);
 
-  for(int i=0; i<num_device; ++i) {
-    const struct Device dev = devices[i];
-    const uint16_t vendor_id = ReadVendorId(dev.bus, dev.device, dev.function);
-    const struct ClassCode class_code = ReadClassCode(dev.bus, dev.device, dev.function);
-    printk("%d.%d.%d: vend %04x, class %08x, head %02x\n",
-        dev.bus, dev.device, dev.function, 
-        vendor_id, class_code, dev.header_type);
+  for(int i=1; i <= xhc.MaxPorts; ++i) {
+    struct Port port = PortAt(xhc, i);
+    Log(kDebug, &console, "Port: %d: IsConnected=%d\n", i, IsPortConnected(port));
+
+    if(IsPortConnected(port)) {
+      err = ConfigurePort(xhc, port);
+      if(err) {
+        Log(kError, &console, "failed to configure port");
+        continue;
+      }
+    }
+  }
+
+  while (1) {
+    err = ProcessEvent(xhc);
+    if(err) {
+      Log(kError, "Error while processing events");
+    }
   }
 
   while (1) __asm__("hlt");
